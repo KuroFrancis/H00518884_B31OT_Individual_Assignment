@@ -1,0 +1,498 @@
+[
+    {
+        "id": "historical_tab",
+        "type": "tab",
+        "label": "Historical Data Charts",
+        "disabled": false,
+        "info": "Read historical sensor data from MongoDB and display charts"
+    },
+    {
+        "id": "build_query",
+        "type": "function",
+        "z": "historical_tab",
+        "name": "Build MongoDB Query",
+        "func": "// Get date range from flow context\nvar startTime = flow.get('start-time') || new Date(Date.now() - 86400000); // Default: last 24h\nvar endTime = flow.get('end-time') || new Date();\n\n// Build MongoDB query\nmsg.query = {\n    timestamp: {\n        $gte: new Date(startTime),\n        $lte: new Date(endTime)\n    }\n};\n\nmsg.sort = { timestamp: 1 }; // Sort by time ascending\nmsg.limit = 1000; // Limit results\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 370,
+        "y": 200,
+        "wires": [
+            [
+                "mongodb_read"
+            ]
+        ]
+    },
+    {
+        "id": "mongodb_read",
+        "type": "mongodb in",
+        "z": "historical_tab",
+        "mongodb": "local_mongodb",
+        "name": "Read Historical Data",
+        "collection": "historicaldata",
+        "operation": "find",
+        "x": 600,
+        "y": 200,
+        "wires": [
+            [
+                "debug_data",
+                "split_data"
+            ]
+        ]
+    },
+    {
+        "id": "split_data",
+        "type": "function",
+        "z": "historical_tab",
+        "name": "Split Temp & Humidity",
+        "func": "// Check if we have data\nif (!msg.payload || msg.payload.length === 0) {\n    node.warn(\"No data returned from MongoDB\");\n    return [null, null];\n}\n\nvar tempData = [];\nvar humidData = [];\n\nfor(var i = 0; i < msg.payload.length; i++) {\n    var record = msg.payload[i];\n    \n    // Use 'time' field (milliseconds) instead of timestamp\n    tempData.push({\n        x: record.time,\n        y: record.temp\n    });\n    \n    humidData.push({\n        x: record.time,\n        y: record.humidity\n    });\n}\n\nreturn [\n    {payload: [{series: [\"Temperature\"], data: [tempData]}]},\n    {payload: [{series: [\"Humidity\"], data: [humidData]}]}\n];",
+        "outputs": 2,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 280,
+        "wires": [
+            [
+                "temp_chart",
+                "debug_temp"
+            ],
+            [
+                "humid_chart",
+                "debug_humid"
+            ]
+        ]
+    },
+    {
+        "id": "temp_chart",
+        "type": "ui_chart",
+        "z": "historical_tab",
+        "name": "Temperature History",
+        "group": "chart_display",
+        "order": 1,
+        "width": "12",
+        "height": "6",
+        "label": "Temperature History (°C)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "No data for selected range",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "50",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#ff0000",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "x": 420,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "humid_chart",
+        "type": "ui_chart",
+        "z": "historical_tab",
+        "name": "Humidity History",
+        "group": "chart_display",
+        "order": 2,
+        "width": "12",
+        "height": "6",
+        "label": "Humidity History (%)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "No data for selected range",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "86400",
+        "cutout": 0,
+        "useOneColor": false,
+        "colors": [
+            "#0000ff",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "x": 420,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "debug_data",
+        "type": "debug",
+        "z": "historical_tab",
+        "name": "Raw MongoDB Data",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "debug_temp",
+        "type": "debug",
+        "z": "historical_tab",
+        "name": "Temperature Array",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 430,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "debug_humid",
+        "type": "debug",
+        "z": "historical_tab",
+        "name": "Humidity Array",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 420,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "data_count",
+        "type": "ui_text",
+        "z": "historical_tab",
+        "group": "chart_controls",
+        "order": 4,
+        "width": "6",
+        "height": "1",
+        "name": "Record Count",
+        "label": "Records Found:",
+        "format": "{{msg.payload.length}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 610,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "load_button",
+        "type": "ui_button",
+        "z": "historical_tab",
+        "name": "",
+        "group": "chart_controls",
+        "order": 3,
+        "width": "6",
+        "height": "1",
+        "passthru": false,
+        "label": "Load Historical Data",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "topicType": "str",
+        "x": 140,
+        "y": 200,
+        "wires": [
+            [
+                "build_query"
+            ]
+        ]
+    },
+    {
+        "id": "start_date_picker",
+        "type": "ui_date_picker",
+        "z": "historical_tab",
+        "name": "",
+        "label": "Start Date",
+        "group": "chart_controls",
+        "order": 1,
+        "width": "6",
+        "height": "1",
+        "passthru": true,
+        "topic": "",
+        "x": 720,
+        "y": 500,
+        "wires": [
+            [
+                "save_start_time"
+            ]
+        ]
+    },
+    {
+        "id": "end_date_picker",
+        "type": "ui_date_picker",
+        "z": "historical_tab",
+        "name": "",
+        "label": "End Date",
+        "group": "chart_controls",
+        "order": 2,
+        "width": "6",
+        "height": "1",
+        "passthru": true,
+        "topic": "",
+        "x": 720,
+        "y": 560,
+        "wires": [
+            [
+                "save_end_time"
+            ]
+        ]
+    },
+    {
+        "id": "save_start_time",
+        "type": "change",
+        "z": "historical_tab",
+        "name": "Save Start Time",
+        "rules": [
+            {
+                "t": "set",
+                "p": "start-time",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 940,
+        "y": 500,
+        "wires": [
+            [
+                "debug_start"
+            ]
+        ]
+    },
+    {
+        "id": "save_end_time",
+        "type": "change",
+        "z": "historical_tab",
+        "name": "Save End Time",
+        "rules": [
+            {
+                "t": "set",
+                "p": "end-time",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 940,
+        "y": 560,
+        "wires": [
+            [
+                "debug_end"
+            ]
+        ]
+    },
+    {
+        "id": "init_dates",
+        "type": "inject",
+        "z": "historical_tab",
+        "name": "Initialize Dates",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "x": 80,
+        "y": 540,
+        "wires": [
+            [
+                "set_start_date",
+                "set_end_date"
+            ]
+        ]
+    },
+    {
+        "id": "set_start_date",
+        "type": "change",
+        "z": "historical_tab",
+        "name": "Set Start Date (24h ago)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "$millis() - 86400000",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 410,
+        "y": 500,
+        "wires": [
+            [
+                "start_date_picker"
+            ]
+        ]
+    },
+    {
+        "id": "set_end_date",
+        "type": "change",
+        "z": "historical_tab",
+        "name": "Set End Date (Now)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "$millis()",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 420,
+        "y": 560,
+        "wires": [
+            [
+                "end_date_picker"
+            ]
+        ]
+    },
+    {
+        "id": "debug_start",
+        "type": "debug",
+        "z": "historical_tab",
+        "name": "Start Time Set",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "debug_end",
+        "type": "debug",
+        "z": "historical_tab",
+        "name": "End Time Set",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "local_mongodb",
+        "type": "mongodb",
+        "hostname": "127.0.0.1",
+        "port": "27017",
+        "db": "esp32_data",
+        "name": "Local MongoDB"
+    },
+    {
+        "id": "chart_display",
+        "type": "ui_group",
+        "name": "Historical Charts",
+        "tab": "historical_tab_ui",
+        "order": 2,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "chart_controls",
+        "type": "ui_group",
+        "name": "Chart Controls",
+        "tab": "historical_tab_ui",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "historical_tab_ui",
+        "type": "ui_tab",
+        "name": "Historical Data",
+        "icon": "fa-area-chart",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    }
+]

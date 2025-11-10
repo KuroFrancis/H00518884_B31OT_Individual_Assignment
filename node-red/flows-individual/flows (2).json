@@ -1,0 +1,116 @@
+[
+    {
+        "id": "mongodb_store_tab",
+        "type": "tab",
+        "label": "Store Sensor Data MongoDB",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "mqtt_in_store",
+        "type": "mqtt in",
+        "z": "mongodb_store_tab",
+        "name": "ESP32 Sensor Input",
+        "topic": "<H00518884>/evt/status/fmt/json",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "local_broker",
+        "inputs": 0,
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "format_timeseries"
+            ]
+        ]
+    },
+    {
+        "id": "format_timeseries",
+        "type": "function",
+        "z": "mongodb_store_tab",
+        "name": "Format Time Series DB record",
+        "func": "msg.payload = {\n    timestamp: new Date(),\n    time: new Date().getTime(),\n    device_id: \"H00518884\",\n    temp: msg.payload.d.temp,\n    humidity: msg.payload.d.humidity\n};\nreturn msg;",
+        "outputs": 1,
+        "timeout": "",
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 430,
+        "y": 100,
+        "wires": [
+            [
+                "debug_formatted",
+                "c3ee3b50f75cbd4f"
+            ]
+        ]
+    },
+    {
+        "id": "debug_formatted",
+        "type": "debug",
+        "z": "mongodb_store_tab",
+        "name": "Debug Formatted Data",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 710,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "c3ee3b50f75cbd4f",
+        "type": "mongodb out",
+        "z": "mongodb_store_tab",
+        "mongodb": "54c993731cc4f699",
+        "name": "",
+        "collection": "historicaldata",
+        "payonly": true,
+        "upsert": false,
+        "multi": false,
+        "operation": "insert",
+        "x": 750,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "local_broker",
+        "type": "mqtt-broker",
+        "name": "Local Mosquitto",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "54c993731cc4f699",
+        "type": "mongodb",
+        "hostname": "127.0.0.1",
+        "topology": "direct",
+        "port": "27017",
+        "db": "esp32_data",
+        "name": "Mongo_db"
+    }
+]

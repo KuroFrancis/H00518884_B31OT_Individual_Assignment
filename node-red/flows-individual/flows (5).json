@@ -1,0 +1,516 @@
+[
+    {
+        "id": "4fefdf2ec6a79e12",
+        "type": "tab",
+        "label": "LED Color Control",
+        "disabled": false,
+        "info": "Control NeoPixel LED color based on temperature thresholds"
+    },
+    {
+        "id": "f26762f225add9c7",
+        "type": "mqtt in",
+        "z": "4fefdf2ec6a79e12",
+        "name": "ESP32 Sensor Data",
+        "topic": "<H00518884>/evt/status/fmt/json",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "713607d6d8fda046",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 200,
+        "wires": [
+            [
+                "d0ca47c1a1e383fe",
+                "fac9d90dd05d00c1",
+                "d77dd8f58fd627a1"
+            ]
+        ]
+    },
+    {
+        "id": "d0ca47c1a1e383fe",
+        "type": "switch",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Temperature Thresholds",
+        "property": "payload.d.temp",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "lte",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "0",
+                "vt": "num",
+                "v2": "10",
+                "v2t": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "10",
+                "vt": "num",
+                "v2": "25",
+                "v2t": "num"
+            },
+            {
+                "t": "btwn",
+                "v": "25",
+                "vt": "num",
+                "v2": "30",
+                "v2t": "num"
+            },
+            {
+                "t": "gte",
+                "v": "30",
+                "vt": "num"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 5,
+        "x": 420,
+        "y": 200,
+        "wires": [
+            [
+                "f147afd55dca7adf"
+            ],
+            [
+                "b0ba0ec74e68bea4"
+            ],
+            [
+                "18205fd606e78c98"
+            ],
+            [
+                "729a95a114a4389e"
+            ],
+            [
+                "78c03fd92c8d3640"
+            ]
+        ]
+    },
+    {
+        "id": "f147afd55dca7adf",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Set LED Blue (≤0°C)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"r\":0,\"g\":0,\"b\":255}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 680,
+        "y": 80,
+        "wires": [
+            [
+                "001d49d6e10b7a6e",
+                "d79ce6bab73b48d2",
+                "f66dac43d5975c53"
+            ]
+        ]
+    },
+    {
+        "id": "b0ba0ec74e68bea4",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Set LED Turquoise (0-10°C)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"r\":0,\"g\":150,\"b\":150}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 660,
+        "y": 140,
+        "wires": [
+            [
+                "001d49d6e10b7a6e",
+                "d79ce6bab73b48d2",
+                "178e86734e422341"
+            ]
+        ]
+    },
+    {
+        "id": "18205fd606e78c98",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Set LED Green (10-25°C)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"r\":0,\"g\":255,\"b\":0}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 690,
+        "y": 200,
+        "wires": [
+            [
+                "001d49d6e10b7a6e",
+                "d79ce6bab73b48d2",
+                "f588ecf59247a65e"
+            ]
+        ]
+    },
+    {
+        "id": "729a95a114a4389e",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Set LED Yellow (25-30°C)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"r\":150,\"g\":150,\"b\":0}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 690,
+        "y": 260,
+        "wires": [
+            [
+                "001d49d6e10b7a6e",
+                "d79ce6bab73b48d2",
+                "584f707fe925c52e"
+            ]
+        ]
+    },
+    {
+        "id": "78c03fd92c8d3640",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Set LED Red (≥30°C)",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "{\"r\":255,\"g\":0,\"b\":0}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 680,
+        "y": 320,
+        "wires": [
+            [
+                "001d49d6e10b7a6e",
+                "d79ce6bab73b48d2",
+                "2836944ed6c9e040"
+            ]
+        ]
+    },
+    {
+        "id": "001d49d6e10b7a6e",
+        "type": "mqtt out",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Send LED Command",
+        "topic": "<H00518884>/cmd/display/fmt/json",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "713607d6d8fda046",
+        "x": 1200,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "fac9d90dd05d00c1",
+        "type": "debug",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Sensor Data",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "d79ce6bab73b48d2",
+        "type": "debug",
+        "z": "4fefdf2ec6a79e12",
+        "name": "LED Command",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1180,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "d77dd8f58fd627a1",
+        "type": "ui_text",
+        "z": "4fefdf2ec6a79e12",
+        "group": "b534ada7182fd30c",
+        "order": 1,
+        "width": "6",
+        "height": "1",
+        "name": "Current Temperature",
+        "label": "Temperature:",
+        "format": "{{msg.payload.d.temp}} °C",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": "",
+        "color": "#000000",
+        "x": 450,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "f651fbfaf3bf48b3",
+        "type": "ui_text",
+        "z": "4fefdf2ec6a79e12",
+        "group": "b534ada7182fd30c",
+        "order": 2,
+        "width": "6",
+        "height": "1",
+        "name": "LED Status",
+        "label": "LED Color:",
+        "format": "{{msg.color}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 1170,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "f66dac43d5975c53",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Blue Label",
+        "rules": [
+            {
+                "t": "set",
+                "p": "color",
+                "pt": "msg",
+                "to": "🔵 Blue (Too Cold)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 910,
+        "y": 80,
+        "wires": [
+            [
+                "f651fbfaf3bf48b3"
+            ]
+        ]
+    },
+    {
+        "id": "178e86734e422341",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Turquoise Label",
+        "rules": [
+            {
+                "t": "set",
+                "p": "color",
+                "pt": "msg",
+                "to": "💠 Turquoise (Cold)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 920,
+        "y": 140,
+        "wires": [
+            [
+                "f651fbfaf3bf48b3"
+            ]
+        ]
+    },
+    {
+        "id": "f588ecf59247a65e",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Green Label",
+        "rules": [
+            {
+                "t": "set",
+                "p": "color",
+                "pt": "msg",
+                "to": "🟢 Green (Normal)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 910,
+        "y": 200,
+        "wires": [
+            [
+                "f651fbfaf3bf48b3"
+            ]
+        ]
+    },
+    {
+        "id": "584f707fe925c52e",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Yellow Label",
+        "rules": [
+            {
+                "t": "set",
+                "p": "color",
+                "pt": "msg",
+                "to": "🟡 Yellow (Warm)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 910,
+        "y": 260,
+        "wires": [
+            [
+                "f651fbfaf3bf48b3"
+            ]
+        ]
+    },
+    {
+        "id": "2836944ed6c9e040",
+        "type": "change",
+        "z": "4fefdf2ec6a79e12",
+        "name": "Red Label",
+        "rules": [
+            {
+                "t": "set",
+                "p": "color",
+                "pt": "msg",
+                "to": "🔴 Red (Too Hot)",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 910,
+        "y": 320,
+        "wires": [
+            [
+                "f651fbfaf3bf48b3"
+            ]
+        ]
+    },
+    {
+        "id": "713607d6d8fda046",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "b534ada7182fd30c",
+        "type": "ui_group",
+        "name": "LED Status",
+        "tab": "9d0a01fcfa3ab468",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "9d0a01fcfa3ab468",
+        "type": "ui_tab",
+        "name": "LED Control",
+        "icon": "fa-lightbulb-o",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
+    }
+]
